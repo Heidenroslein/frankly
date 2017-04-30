@@ -9,21 +9,50 @@
 label labdialoguebranching:
     scene labstaticsansiggs
     if inventory.has_item(bedshirt) and bad_shirt == False:
+        show monsterneutral at dialogueslidedissolveintwoleft
+        show iggsslightpeevedfrown at dialogueslidedissolveintwoleft
+        $ Fr_exp = "happyyello"
         dr "I found a shirt!"
+        $ Fr_exp = "neutral1"
+        show iggshappyo at dialoguetworight
+        hide iggsslightpeevedfrown
         ig "Great!"
+        $ Fr_exp = "gone"
+        show iggshappy at dialoguetworight
+        hide iggshappyo
+        show monstersweetsmile at dialoguetwoleftbob
+        hide monsterneutral
+        show bedshirtbig at dialoguetworightslidedissolveinitem
         "I pull out my bedshirt and move to put it on my boyfriend."
+        show iggsplzo at dialoguetworight
+        hide iggshappy
         ig "What are you doing?"
+        show iggsplzfrown at dialoguetworight
+        hide iggsplzo
+        $ Fr_exp = "thinkingo"
         dr "What? I’m clearly giving my boyfriend a shirt, that’s what you wanted, right?"
+        $ Fr_exp = "nervousangryo"
+        show monsterneutral at dialoguetwoleft
+        hide monstersweetsmile
         dr "To abide by public decency laws and all that other crap."
+        $ Fr_exp = "neutral1"
         ig "Well- I mean. Don’t you have anything fancier?"
+        $ Fr_exp = "confusedsideo"
         dr "Look, this is the only thing I own that will fit him." 
+        $ Fr_exp = "confusedside"
         ig "You can spruce it up at least. I mean, it has- blood? Are those blood stains on the front?"
+        $ Fr_exp = "confusedo"
         dr "It’s coffee. And what? You want me to spruce it up? What- what does that even mean?"
+        $ Fr_exp = "thinking"
         ig "I’m pretty sure that’s not coffee, Dr. Frank..."
         ig "Aahh... Do you own a tie or a bowtie or something?"
+        $ Fr_exp = "surprisedsideo"
         dr "Er-. Besides the one I’m wearing..."
+        $ Fr_exp = "angryneutralo"
         dr "Er-. Besides the one I’m wearing...{fast} No. And I can’t take this off, it’ll ruin my {i}‘look’{/i}." 
+        $ Fr_exp = "angryneutral"
         ig "..."
+        
         ig "Well then you better find something else to go with it." 
         ig "Here, have this back. You’ll probably need to combine this with something else."
         $ bad_shirt = True
@@ -40,6 +69,16 @@ label labdialoguebranching:
         ig "You know what, let’s just make sure no one touches him during the presentation. For health precautions."
         $ inventory.drop(fancyshirt)
         $ wearing_shirt = True
+        if wearing_shirt == True and wearing_shoes == True and wearing_pants == True:
+            jump clothedmonsterboyfriend
+        else:
+            jump lab
+    if inventory.has_item(exshoes):
+        dr "I found shoes that will fit my boyfriend!"
+        ig "That's great!"
+        mon "Shoes, shoes!"
+        $ inventory.drop(exshoes)
+        $ wearing_shoes = True
         if wearing_shirt == True and wearing_shoes == True and wearing_pants == True:
             jump clothedmonsterboyfriend
         else:
@@ -415,16 +454,60 @@ label iggsdialogue:
             menu:
                 "{size=-10}I need help finding...{/size}":
                     menu:
-                        "Shoes.":
-                            dr "Shoes."
-                            
-                            $ dialogue_choice = False
-                            jump lab
-                        "A shirt." if bad_shirt == False:
-                            dr "A shirt."
-                            $ dialogue_choice = False
-                            jump lab
-                        "A fancier shirt." if bad_shirt == True:
+                        "Shoes." if wearing_shoes == False:
+                            if looked_shoes = "False":
+                                dr "I'm looking for some shoes."
+                                ig "Hmm, and I'm assuming none of your shoes will fit him?"
+                                dr "Unfortunately not."
+                                ig "You should look around your house a bit more, I'm sure you'll be able to find something."
+                                dr "If you say so..."
+                                $ dialogue_choice = False
+                                jump lab
+                            if looked_shoes = "True":
+                                if shoe_question == 0:
+                                    dr "I found some shoes that’ll fit my new boyfriend." 
+                                    ig "Oh, that’s great." 
+                                    dr "…"
+                                    ig "…And?"
+                                    dr "I can’t get to them. They’re locked in the hallway cupboard."
+                                    ig "Why do you have shoes in your cupboard?"
+                                    dr "Look, that’s not the point."
+                                    dr "How do I open it?"
+                                    ig "…"
+                                    ig "You’ll need to use an item on the cupboard to open it." 
+                                    dr "Alright."
+                                    $ shoe_question = 1
+                                    $ dialogue_choice = False
+                                    jump lab
+                                if shoe_question == 1:
+                                    dr "Haha... yeah so those shoes..."
+                                    ig "Still can’t get them?"
+                                    dr "No."
+                                    ig "Maybe you shouldn’t lock shoes away in cupboards. "
+                                    # TODO angry face
+                                    dr "..."
+                                    ig "Fine, the item you’re looking for is in the kitchen."
+                                    $ dialogue_choice = False
+                                    jump lab
+      
+                        "A shirt." if bad_shirt == False and wearing_shirt == False:
+                            if normal_shirt_question == 0:
+                                dr "Where can I find a shirt big enough for him?"
+                                ig "Hmm, he is pretty large. I’d assume most of your normal shirts would be too tiny."
+                                ig "Do you have any large nightshirts or anything?"
+                                dr "Oh, yeah I do!"
+                                dr "I should probably go look for that."
+                                $ normal_shirt_question = 1
+                                $ dialogue_choice = False
+                                jump lab
+                            if normal_shirt_question == 1:
+                                dr "I can’t find my nightshirt."
+                                ig "What do you mean you can’t find it?"
+                                ig "I mean, did you look in your bedroom?" 
+                                dr "Oh, I guess I can go back and look."
+                                $ dialogue_choice = False
+                                jump lab
+                        "A fancier shirt." if bad_shirt == True and wearing_shirt == False:
                             if fancy_shirt_question == 0:
                                 dr "A... fancier shirt? What's wrong with this one?"
                                 ig "You mean, besides it being a wrinkled nightshirt from a decade old science camp?"
