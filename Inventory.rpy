@@ -36,6 +36,11 @@ init -1 python:
             else:
                 message = "It didn't work!"
                 renpy.show_screen ("inventory_popup", message=message)
+        def has_selected(self, item):
+                if item in self.selection:
+                    return True
+                else:
+                    return False
             
         
                 
@@ -67,6 +72,7 @@ init -1 python:
             BODYPART = 9
             BOOK = 10
             FANCYSHIRT = 11
+            PIG = 12
         #def combine_with(self, other):
             ####Combines this item with another.###
             #combo = frozenset([self.kind, other.kind])
@@ -91,6 +97,12 @@ init -1 python:
             if self.money >= item.cost:
                 self.items.append(item)
                 self.money -= item.cost
+        ### HEAVEN HELP ME
+        def has_item (self, item):
+                if item in self.items:
+                    return True
+                else:
+                    return False
                 
     def item_use():
         item.use()
@@ -123,21 +135,21 @@ init -1 python:
 ###This is my button to open the inventory!###
 screen inventory_button:
     add "images/gui/inventory_screen/fencebutton.png"
-    imagebutton auto "images/gui/inventory_screen/inventory_button_%s.png" xpos 0 ypos 0 focus_mask True action [ Show("inventory_screen"), Hide("inventory_button"), SetVariable("inventory_pos", "right"),]
+    imagebutton auto "images/gui/inventory_screen/inventory_button_%s.png" xpos 0 ypos 0 focus_mask True action [ Show("inventory_screen"), Hide("inventory_button"), SetVariable("inventory_pos", "right"), SetVariable("inventory_look", "noshow")]
  
 screen inventory_button2: 
     add "images/gui/inventory_screen/fencebutton2.png"
-    imagebutton auto "images/gui/inventory_screen/inventory_button2_%s.png" xpos 0 ypos 0 focus_mask True action [ Show("inventory_screen"), Hide("inventory_button2"), SetVariable("inventory_pos", "left"),]
+    imagebutton auto "images/gui/inventory_screen/inventory_button2_%s.png" xpos 0 ypos 0 focus_mask True action [ Show("inventory_screen"), Hide("inventory_button2"), SetVariable("inventory_pos", "left"), SetVariable("inventory_look", "noshow")]
 
 ###THis is my inventory screen!###,
 screen inventory_screen:
     add "images/gui/inventory_screen/inventoryscreen.png"
     modal True
     if inventory_pos == "left":
-        imagebutton auto "images/gui/inventory_screen/inventory_exit_%s.png" xpos 0 ypos 0 focus_mask True action [ Hide("inventory_screen"), Hide ("item_options"), Show("inventory_button2"), player.dump]
+        imagebutton auto "images/gui/inventory_screen/inventory_exit_%s.png" xpos 0 ypos 0 focus_mask True action [ Hide("inventory_screen"), Hide ("item_options"), Show("inventory_button2"), SetVariable("inventory_look", "show"), player.dump]
     elif inventory_pos == "right": 
-        imagebutton auto "images/gui/inventory_screen/inventory_exit_%s.png" xpos 0 ypos 0 focus_mask True action [ Hide("inventory_screen"), Hide ("item_options"), Show("inventory_button"), player.dump]
-    $ x = 240 # coordinates of the top left item position
+        imagebutton auto "images/gui/inventory_screen/inventory_exit_%s.png" xpos 0 ypos 0 focus_mask True action [ Hide("inventory_screen"), Hide ("item_options"), Show("inventory_button"), SetVariable("inventory_look", "show"), player.dump]
+    $ x = 235 # coordinates of the top left item position
     $ y = 180
     ###Im not entirely sure how this works, but its setting how to sort items!###
     $ sorted_items = sorted(inventory.items, key=attrgetter('kind'), reverse=True)
@@ -169,7 +181,10 @@ screen item_options:
     else:
         add "images/gui/inventory_screen/inventory_options_examine_idle.png"
     if len(player.selection)==1:
-        imagebutton auto "images/gui/inventory_screen/inventory_options_use_%s.png" xpos 0 ypos 0 focus_mask True action NullAction()
+        if inventory_pos == "left":
+            imagebutton auto "images/gui/inventory_screen/inventory_options_use_%s.png" xpos 0 ypos 0 focus_mask True action [ Hide("item_options"), Hide ("inventory_screen"), Show("inventory_button2"), SetVariable("item_use", "True"), SetVariable("inventory_look", "show"), Function(change_cursor, "2"),]
+        elif inventory_pos == "right":
+            imagebutton auto "images/gui/inventory_screen/inventory_options_use_%s.png" xpos 0 ypos 0 focus_mask True action [ Hide("item_options"), Hide ("inventory_screen"), Show("inventory_button"), SetVariable("item_use", "True"), SetVariable("inventory_look", "show"), Function(change_cursor, "2"),]
     else:
         add "images/gui/inventory_screen/inventory_options_use_idle.png"
     if len(player.selection)==2:
@@ -179,7 +194,10 @@ screen item_options:
 screen examine_screen:
     add "images/gui/examine_screen/examine_screen_base.png"
     modal True
-    imagebutton auto "images/gui/examine_screen/examine_screen_return_%s.png" xpos 0 ypos 0 focus_mask True action [Hide ("examine_screen"), Show ("inventory_button"), player.dump]
+    if inventory_pos == "left":
+        imagebutton auto "images/gui/examine_screen/examine_screen_return_%s.png" xpos 0 ypos 0 focus_mask True action [Hide ("examine_screen"), Show ("inventory_button2"), player.dump]
+    elif inventory_pos == "right":    
+        imagebutton auto "images/gui/examine_screen/examine_screen_return_%s.png" xpos 0 ypos 0 focus_mask True action [Hide ("examine_screen"), Show ("inventory_button"), player.dump]
 
     
 screen inventory_popup(message):
