@@ -91,7 +91,7 @@ init -1 python:
             self.items.append(item)
         ### Defining what it means to drop ###
         def drop(self, item):
-            self.items.remove(item)
+            self.items = [i for i in self.items if i.name != item.name]
         ### Defining what it means to buy, which i dont need to worry about for my game###
         def buy(self, item):
             if self.money >= item.cost:
@@ -99,11 +99,13 @@ init -1 python:
                 self.money -= item.cost
         ### HEAVEN HELP ME
         def has_item (self, item):
-                if item in self.items:
+                if item.name in [i.name for i in self.items]:
                     return True
                 else:
                     return False
-                
+        def __eq__(self, other):
+            return self.name == other.name
+        
     def item_use():
         item.use()
         
@@ -115,7 +117,7 @@ init -1 python:
             result_name = combo_list[ [x[0] for x in combo_list].index(combined_name) ][1]
             for item in complete_item_list:
                 if item.name == result_name:
-                    inventory.add(item)
+                    inventory.items.append(item)
                     break
             inventory.drop(item1)
             inventory.drop(item2)
@@ -125,7 +127,7 @@ init -1 python:
             message = "It didn't work!"
             renpy.show_screen ("inventory_popup", message=message)
         
-    combo_list = [ ("Bed Shirt-Decomposing Arm", "Fancy Shirt")]
+    combo_list = [ ("Bed Shirt-Napkin", "Fancy Shirt")]
     #(X, Y) -> X = Ingredients, Y = Outcome
     
     
